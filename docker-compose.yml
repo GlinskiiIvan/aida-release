@@ -18,7 +18,7 @@ services:
       - backend
 
   frontend:
-    image: brodyga/aida-frontend:0.1.1
+    image: brodyga/aida-frontend:0.1.2
     env_file:
       - ./frontend/${FRONTEND_ENV}
     ports:
