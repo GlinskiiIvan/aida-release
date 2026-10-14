@@ -2,8 +2,7 @@ name: aida
 
 services:
   backend:
-    image: brodyga/aida-backend:0.1.4
-    command: pnpm run start
+    image: brodyga/aida-backend:0.1.5
     env_file:
       - ./backend/${BACKEND_ENV}
     volumes:
@@ -19,13 +18,11 @@ services:
       - backend
 
   frontend:
-    image: brodyga/aida-frontend:0.1.3
-    command: pnpm run start
+    image: brodyga/aida-frontend:0.1.5
     env_file:
       - ./frontend/${FRONTEND_ENV}
     ports:
       - "5173:5173"
-    #command: pnpm run preview --host 0.0.0.0 --port 5173
     depends_on:
       - backend
     restart: unless-stopped
@@ -33,8 +30,7 @@ services:
       - backend
 
   compute:
-    image: brodyga/aida-compute:0.1.3
-    command: uvicorn src.app:app --host 0.0.0.0 --port 8000 --reload
+    image: brodyga/aida-compute:0.1.5
     env_file:
       - ./compute/${COMPUTE_ENV}
     ports:
@@ -49,7 +45,7 @@ services:
       - backend
 
   worker-upload:
-    image: brodyga/aida-compute:0.1.3
+    image: brodyga/aida-compute:0.1.5
     command: celery -A src.tasks.celery_app worker -Q upload --concurrency=1 --pool=solo --hostname=upload@%h --loglevel=info
     env_file:
       - ./compute/${COMPUTE_ENV}
@@ -63,7 +59,7 @@ services:
       - backend
 
   worker-inference:
-    image: brodyga/aida-compute:0.1.3
+    image: brodyga/aida-compute:0.1.5
     command: celery -A src.tasks.celery_app worker -Q inference --concurrency=1 --pool=solo --hostname=inference@%h --loglevel=info
     env_file:
       - ./compute/${COMPUTE_ENV}
