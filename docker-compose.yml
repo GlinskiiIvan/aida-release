@@ -2,11 +2,12 @@ name: aida
 
 services:
   backend:
-    image: brodyga/aida-backend:0.1.3
+    image: brodyga/aida-backend:0.1.4
+    command: pnpm run start
     env_file:
       - ./backend/${BACKEND_ENV}
     volumes:
-      - storage:/storage
+      - ./storage:/storage
     ports:
       - "6100:3000"
     depends_on:
@@ -19,11 +20,12 @@ services:
 
   frontend:
     image: brodyga/aida-frontend:0.1.3
+    command: pnpm run start
     env_file:
       - ./frontend/${FRONTEND_ENV}
     ports:
       - "5173:5173"
-    command: pnpm run preview --host 0.0.0.0 --port 5173
+    #command: pnpm run preview --host 0.0.0.0 --port 5173
     depends_on:
       - backend
     restart: unless-stopped
@@ -32,12 +34,13 @@ services:
 
   compute:
     image: brodyga/aida-compute:0.1.3
+    command: uvicorn src.app:app --host 0.0.0.0 --port 8000 --reload
     env_file:
       - ./compute/${COMPUTE_ENV}
     ports:
       - "8002:8000"
     volumes:
-      - storage:/storage
+      - ./storage:/storage
     depends_on:
       - redis
       - rabbitmq
@@ -51,7 +54,7 @@ services:
     env_file:
       - ./compute/${COMPUTE_ENV}
     volumes:
-      - storage:/storage
+      - ./storage:/storage
     depends_on:
       - redis
       - rabbitmq
@@ -65,7 +68,7 @@ services:
     env_file:
       - ./compute/${COMPUTE_ENV}
     volumes:
-      - storage:/storage
+      - ./storage:/storage
     depends_on:
       - redis
       - rabbitmq
@@ -110,7 +113,6 @@ services:
       - backend
 
 volumes:
-  storage:
   pgdata:
   rabbitmq:
 
