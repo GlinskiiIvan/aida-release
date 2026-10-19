@@ -2,7 +2,7 @@ name: aida
 
 services:
   backend:
-    image: brodyga/aida-backend:0.1.5
+    image: brodyga/aida-backend:0.1.6
     env_file:
       - ./backend/${BACKEND_ENV}
     volumes:
