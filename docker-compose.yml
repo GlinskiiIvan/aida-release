@@ -71,14 +71,6 @@ services:
     restart: unless-stopped
     networks:
       - backend
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities:
-                - gpu
 
   redis:
     image: redis:7
