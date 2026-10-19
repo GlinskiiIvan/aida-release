@@ -6,7 +6,7 @@ services:
     env_file:
       - ./backend/${BACKEND_ENV}
     volumes:
-      - ./storage:/storage
+      - aida_storage:/storage
     ports:
       - "6100:3000"
     depends_on:
@@ -36,7 +36,7 @@ services:
     ports:
       - "8002:8000"
     volumes:
-      - ./storage:/storage
+      - aida_storage:/storage
     depends_on:
       - redis
       - rabbitmq
@@ -50,7 +50,7 @@ services:
     env_file:
       - ./compute/${COMPUTE_ENV}
     volumes:
-      - ./storage:/storage
+      - aida_storage:/storage
     depends_on:
       - redis
       - rabbitmq
@@ -64,7 +64,7 @@ services:
     env_file:
       - ./compute/${COMPUTE_ENV}
     volumes:
-      - ./storage:/storage
+      - aida_storage:/storage
     depends_on:
       - redis
       - rabbitmq
@@ -119,6 +119,7 @@ services:
 volumes:
   pgdata:
   rabbitmq:
+  aida_storage:
 
 networks:
   backend:
