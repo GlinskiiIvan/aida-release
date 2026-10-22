@@ -1,0 +1,116 @@
+name: aida
+
+services:
+  backend:
+    image: brodyga/aida-backend:0.1.7
+    env_file:
+      - ./backend/${BACKEND_ENV}
+    volumes:
+      - aida_storage:/storage
+    ports:
+      - "6100:3000"
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+    networks:
+      - backend
+
+  frontend:
+    image: brodyga/aida-frontend:0.1.7
+    env_file:
+      - ./frontend/${FRONTEND_ENV}
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - backend
+
+  compute:
+    image: brodyga/aida-compute:0.1.7-cpu
+    env_file:
+      - ./compute/${COMPUTE_ENV}
+    ports:
+      - "8002:8000"
+    volumes:
+      - aida_storage:/storage
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - backend
+
+  worker-upload:
+    image: brodyga/aida-compute:0.1.7-cpu
+    command: celery -A src.tasks.celery_app worker -Q upload --concurrency=1 --pool=solo --hostname=upload@%h --loglevel=info
+    env_file:
+      - ./compute/${COMPUTE_ENV}
+    volumes:
+      - aida_storage:/storage
+    depends_on:
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+    networks:
+      - backend
+
+  worker-inference:
+    image: brodyga/aida-compute:0.1.7-cpu
+    command: celery -A src.tasks.celery_app worker -Q inference --concurrency=1 --pool=solo --hostname=inference@%h --loglevel=info
+    env_file:
+      - ./compute/${COMPUTE_ENV}
+    volumes:
+      - aida_storage:/storage
+    depends_on:
+      - redis
+      - rabbitmq
+    restart: unless-stopped
+    networks:
+      - backend
+
+  redis:
+    image: redis:7
+    ports:
+      - "6380:6379"
+    restart: unless-stopped
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    restart: unless-stopped
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:16
+    env_file:
+      - ./backend/${BACKEND_ENV}
+    environment:
+      PG_DATA: /var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - backend
+
+volumes:
+  pgdata:
+  rabbitmq:
+  aida_storage:
+
+networks:
+  backend:
